@@ -2,12 +2,44 @@ class Flock {
 
   constructor() {
     this.boids = []; 
+    this.grid = new Map();
   }
+
+  buildGrid() {
+    this.grid.clear();
+    for (let b of this.boids) {
+      let gx = floor(b.position.x / gridSize);
+      let gy = floor(b.position.y / gridSize);
+      let key = gx + "," + gy;
+      if (!this.grid.has(key)) this.grid.set(key, []);
+      this.grid.get(key).push(b);
+    }
+  }
+
+  getNeighbors(boid) {
+    let neighbors = [];
+    let gx = floor(boid.position.x / gridSize);
+    let gy = floor(boid.position.y / gridSize);
+
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        let key = (gx + dx) + "," + (gy + dy);
+        if (this.grid.has(key)) {
+          neighbors.push(...this.grid.get(key));
+        }
+      }
+    }
+    return neighbors;
+  }
+
   run() {
+    this.buildGrid();
+
     for (let boid of this.boids) {
-      boid.run(this.boids); 
+      let nearby = this.getNeighbors(boid);
+      boid.run(nearby);
+
       if(keyIsPressed&&key=="w"){
-        //background(255, 255, 255, 160);
         this.attracting = true;
       }
       else{
@@ -15,10 +47,12 @@ class Flock {
       }
     }
   }
+
   addBoid(b) {
     this.boids.push(b);
   }
 }
+
 
 class Boid {
   constructor(x, y) {

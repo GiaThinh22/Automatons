@@ -1,5 +1,5 @@
 let flock;
-
+let gridSize = 50;
 function setup() {
   createCanvas(800, 600);
   flock = new Flock();
